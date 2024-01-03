@@ -1,0 +1,119 @@
+[SQL CHALLENGE] https://mystery.knightlab.com/walkthrough.html
+
+
+SELECT *
+FROM crime_scene_report
+WHERE date = 20180115
+AND city = 'SQL City';
+
+20180115 murder	Security footage shows that there were 2 witnesses. The first witness lives at the last house on "Northwestern Dr". The second witness, named Annabel, lives somewhere on "Franklin Ave". SQL City
+
+
+-- 1st witness
+SELECT *
+FROM person
+WHERE address_street_name = 'Northwestern Dr'
+ORDER BY address_number DESC LIMIT 1;
+
+> name: Morty Schapiro
+> id: 14887
+
+-- 2nd witness
+SELECT *
+FROM person
+WHERE name LIKE 'Annabel%'
+AND address_street_name = 'Franklin Ave';
+
+> name: Annabel Miller
+> id: 16371
+
+-- Transcript of 2 witnesses
+SELECT person.name, interview.transcript
+FROM person
+JOIN interview
+ON person.id = interview.person_id
+WHERE person.name = 'Morty Schapiro' OR person.name = 'Annabel Miller';
+
+
+-- Find the murderer
+
+SELECT *
+FROM drivers_license
+WHERE plate_number LIKE '%H42W%';
+
+> person.license_id: 183779 ; 423327 ; 664760
+
+SELECT *
+FROM get_fit_now_check_in
+WHERE check_in_date = 20180109
+AND membership_id LIKE '48Z%';
+
+> membership_id (id): 48Z7A ; 48Z55
+
+
+SELECT *
+FROM get_fit_now_member
+WHERE membership_status = 'gold'
+AND id = '48Z7A' OR id = '48Z55';
+
+> id (membership_id) = 48Z7A ; 48Z55
+
+-- 
+SELECT person.name
+FROM person
+JOIN drivers_license
+ON person.license_id = drivers_license.id
+JOIN get_fit_now_member
+ON person.id = get_fit_now_member.person_id
+WHERE membership_status = 'gold'
+AND get_fit_now_member.id = '48Z7A' OR get_fit_now_member.id = '48Z55';
+
+> Killer name: Jeremy Bowers
+
+
+-- Find the real villian behind the crime
+
+SELECT interview.transcript
+FROM interview
+JOIN person
+ON interview.person_id = person.id
+WHERE person.name = 'Jeremy Bowers';
+
+
+> she's around 5'5" (65") or 5'7" (67"). She has red hair and she drives a Tesla Model S. I know that she attended the SQL Symphony Concert 3 times in December 2017.
+
+SELECT *
+FROM drivers_license
+WHERE hair_color = 'red'
+AND car_make = 'Tesla'
+AND gender = 'female';
+
+id (license_id): 202298 ; 291182 ; 918773
+
+SELECT *
+FROM facebook_event_checkin
+WHERE date LIKE '201712%'
+ORDER BY date ASC;
+
+SELECT DISTINCT person_id, date
+FROM facebook_event_checkin
+WHERE date LIKE '201712%'
+ORDER BY date ASC;
+
+> person_id
+
+SELECT person.name
+FROM person
+JOIN drivers_license
+ON person.license_id = drivers_license.id
+JOIN facebook_event_checkin
+ON person.id = facebook_event_checkin.person_id
+WHERE drivers_license.hair_color = 'red'
+AND drivers_license.car_make = 'Tesla'
+AND drivers_license.gender = 'female'
+AND facebook_event_checkin.date LIKE '201712%';
+
+> Miranda Priestly
+
+
+Congrats, you found the brains behind the murder! Everyone in SQL City hails you as the greatest SQL detective of all time. Time to break out the champagne!
